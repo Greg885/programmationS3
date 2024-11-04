@@ -16,5 +16,6 @@ if __name__ == '__main__':
         print(err)
     except RecursionError:
         print("ERR y ne peut pas etre égal à 0")
+
     finally:
         print("END")
