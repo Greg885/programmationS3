@@ -11,8 +11,11 @@ class SimpleApp(QWidget):
         self.setGeometry(100, 100, 300, 150)
 
         # Création des widgets
-        self.label = QLabel("Saisir votre nom", self)
-        self.name_input = QLineEdit(self)
+        self.label1 = QLabel("Saisir votre Nom", self)
+        self.name_input1 = QLineEdit(self)
+
+        self.label2 = QLabel("Saisir votre Prénom", self)
+        self.name_input2 = QLineEdit(self)
 
         self.ok_button = QPushButton("Ok", self)
         self.ok_button.clicked.connect(self.greet_user)
@@ -22,19 +25,22 @@ class SimpleApp(QWidget):
 
         # Disposition des widgets
         layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        layout.addWidget(self.name_input)
+        layout.addWidget(self.label1)
+        layout.addWidget(self.name_input1)
+        layout.addWidget(self.label2)
+        layout.addWidget(self.name_input2)
         layout.addWidget(self.ok_button)
         layout.addWidget(self.quit_button)
 
         self.setLayout(layout)
 
     def greet_user(self):
-        name = self.name_input.text()
-        if name:
-            QMessageBox.information(self, "Message", f"Bonjour {name} !")
+        name = self.name_input1.text()
+        surname = self.name_input2.text()
+        if name and surname:
+            QMessageBox.information(self, f"Message d'information", f"Bonjour {name} {surname}!")
         else:
-            QMessageBox.warning(self, "Attention", "Veuillez entrer un nom.")
+            QMessageBox.warning(self, "Attention", "Veuillez entrer l'information manquante.")
 
 
 # Exécution de l'application
