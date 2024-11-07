@@ -37,7 +37,7 @@ class SimpleApp(QWidget):
             QMessageBox.warning(self, "Attention", "Veuillez entrer un nom.")
 
 
-# Exécution de l'application
+# Exécution de l'applicatio
 app = QApplication(sys.argv)
 window = SimpleApp()
 window.show()
