@@ -55,7 +55,7 @@ class ClientApp:
 
         # Paramètres par défaut
         self.default_ip = "127.0.0.1"
-        self.default_port = 8080
+        self.default_port = 10000
 
         # Variables de l'interface
         self.server_ip_var = tk.StringVar(value=self.default_ip)
