@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
 
 
-class SimpleApp(QWidget):
+class EX1(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -38,13 +38,13 @@ class SimpleApp(QWidget):
         name = self.name_input1.text()
         surname = self.name_input2.text()
         if name and surname:
-            QMessageBox.information(self, f"Message d'information", f"Bonjour {name} {surname}!")
+            QMessageBox.information(self, f"Message d'information", f"Bonjour {name} {surname} !")
         else:
             QMessageBox.warning(self, "Attention", "Veuillez entrer l'information manquante.")
 
 
 # Exécution de l'application
 app = QApplication(sys.argv)
-window = SimpleApp()
+window = EX1()
 window.show()
 sys.exit(app.exec_())
