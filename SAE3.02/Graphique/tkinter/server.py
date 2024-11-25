@@ -1,7 +1,7 @@
 import socket
 import threading
 import subprocess
-import platform
+import os
 
 
 class ClientHandler(threading.Thread):
@@ -17,46 +17,90 @@ class ClientHandler(threading.Thread):
             print(f"Connexion établie avec {self.client_address}")
 
             # Réception des données du client
-            data = self.client_socket.recv(4096).decode()
+            data = self.client_socket.recv(8192).decode()
             if not data:
                 return
 
-            # Extraction du type et du code
-            code_type, code = data.split("\n", 1)
-            print(f"Type de code reçu: {code_type}")
+            # Extraction du type de fichier, du nom, et du contenu
+            file_type, file_name, file_content = data.split("\n", 2)
+            print(f"Type de fichier reçu : {file_type}, Nom du fichier : {file_name}")
 
-            # Exécution du code
-            output = self.execute_code(code, code_type)
+            # Sauvegarder le fichier temporairement
+            output = self.compile_and_execute(file_type, file_name, file_content)
             self.client_socket.sendall(output.encode())
         except Exception as e:
             print(f"Erreur avec {self.client_address}: {e}")
+            self.client_socket.sendall(f"Erreur : {e}".encode())
         finally:
             self.client_socket.close()
 
-    def execute_code(self, code, code_type):
-        """Exécute le code et retourne le résultat."""
-        command = "python3" if code_type == "Python" else "gcc"
+    def compile_and_execute(self, file_type, file_name, file_content):
+        """Compile et exécute un fichier basé sur son type."""
         try:
-            if code_type == "Python":
+            if file_type == "Python":
+                # Sauvegarder le fichier Python
+                temp_file = "temp.py"
+                with open(temp_file, "w") as file:
+                    file.write(file_content)
+
+                # Exécuter le fichier Python
                 result = subprocess.run(
-                    ["python3", "-c", code],
+                    ["python3", temp_file], capture_output=True, text=True
+                )
+
+            elif file_type == "C":
+                # Sauvegarder le fichier C
+                temp_file = "temp.c"
+                output_file = "temp.out"
+                with open(temp_file, "w") as file:
+                    file.write(file_content)
+
+                # Compiler le fichier C
+                compile_result = subprocess.run(
+                    ["gcc", temp_file, "-o", output_file],
                     capture_output=True,
                     text=True,
                 )
-            elif code_type == "C":
-                # Sauvegarde temporaire et compilation
-                with open("temp.c", "w") as file:
-                    file.write(code)
-                result = subprocess.run(
-                    ["gcc", "temp.c", "-o", "temp.out"], capture_output=True, text=True
+                if compile_result.returncode != 0:
+                    return compile_result.stderr
+
+                # Exécuter l'exécutable compilé
+                result = subprocess.run([f"./{output_file}"], capture_output=True, text=True)
+
+            elif file_type == "Java":
+                # Sauvegarder le fichier Java
+                temp_file = f"{file_name}.java"
+                with open(temp_file, "w") as file:
+                    file.write(file_content)
+
+                # Compiler le fichier Java
+                compile_result = subprocess.run(
+                    ["javac", temp_file], capture_output=True, text=True
                 )
-                if result.returncode == 0:
-                    result = subprocess.run(
-                        ["./temp.out"], capture_output=True, text=True
-                    )
+                if compile_result.returncode != 0:
+                    return compile_result.stderr
+
+                # Exécuter le fichier compilé
+                result = subprocess.run(
+                    ["java", file_name], capture_output=True, text=True
+                )
+
+            else:
+                return f"Type de fichier non supporté : {file_type}"
+
+            # Retourner le résultat de l'exécution
             return result.stdout if result.returncode == 0 else result.stderr
         except Exception as e:
             return f"Erreur lors de l'exécution : {e}"
+        finally:
+            # Nettoyer les fichiers temporaires
+            self.cleanup_temp_files()
+
+    def cleanup_temp_files(self):
+        """Supprime les fichiers temporaires générés."""
+        for temp_file in ["temp.py", "temp.c", "temp.out", "Temp.java", "Temp.class"]:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 class Server:
@@ -73,7 +117,7 @@ class Server:
         try:
             while True:
                 client_socket, client_address = self.server_socket.accept()
-                print(f"Nouvelle connexion: {client_address}")
+                print(f"Nouvelle connexion : {client_address}")
                 handler = ClientHandler(client_socket, client_address)
                 handler.start()
         except KeyboardInterrupt:

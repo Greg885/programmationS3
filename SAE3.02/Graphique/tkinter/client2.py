@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import socket
 import threading
+import os
 
 
 class ConnectionManager:
@@ -26,12 +27,13 @@ class ConnectionManager:
         except (socket.timeout, socket.error) as e:
             return f"Erreur de connexion : {e}"
 
-    def send_code(self, code, code_type):
-        """Crée une nouvelle connexion, envoie le code et reçoit la réponse."""
+    def send_file(self, file_content, file_type, file_name):
+        """Crée une nouvelle connexion, envoie le fichier et reçoit la réponse."""
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
                 client_socket.connect((self.server_ip, self.server_port))
-                client_socket.sendall(f"{code_type}\n{code}".encode())
+                # Envoi du type de fichier, du nom et du contenu
+                client_socket.sendall(f"{file_type}\n{file_name}\n{file_content}".encode())
                 response = client_socket.recv(4096).decode()
                 return response
         except Exception as e:
@@ -43,7 +45,7 @@ class ClientApp:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Client Serveur Futuriste")
+        self.root.title("Client")
         self.root.configure(bg="#1e1e2f")  # Couleur de fond sombre
         self.connection_manager = ConnectionManager()
 
@@ -57,47 +59,24 @@ class ClientApp:
     def apply_futuristic_styles(self):
         """Applique un thème futuriste."""
         self.style.theme_use("clam")
-
-        # Style des boutons
         self.style.configure(
             "TButton",
             font=("Consolas", 12),
             foreground="#0ef9f9",
             background="#262640",
-            borderwidth=1,
             padding=5,
         )
-        self.style.map(
-            "TButton",
-            background=[("active", "#0ef9f9")],
-            foreground=[("active", "#1e1e2f")],
-        )
-
-        # Style des étiquettes
         self.style.configure(
             "TLabel",
             font=("Consolas", 12),
             foreground="#0ef9f9",
             background="#1e1e2f",
         )
-
-        # Style des entrées
         self.style.configure(
             "TEntry",
             font=("Consolas", 12),
             fieldbackground="#262640",
             foreground="#0ef9f9",
-            bordercolor="#0ef9f9",
-        )
-
-        # Style des boîtes de texte
-        self.style.configure(
-            "Text",
-            font=("Courier New", 10),
-            background="#262640",
-            foreground="#0ef9f9",
-            borderwidth=1,
-            relief="flat",
         )
 
     def create_connection_interface(self):
@@ -132,31 +111,30 @@ class ClientApp:
     def create_file_interface(self):
         """Crée l'interface pour le choix et l'envoi du fichier."""
         self.clear_root()
-        self.root.geometry("500x800")  # Fenêtre agrandie
+        self.root.geometry("500x600")
 
         ttk.Button(self.root, text="Retour", command=self.create_connection_interface).pack(pady=5)
 
         ttk.Label(self.root, text="Choix du type de fichier:", style="TLabel").pack(pady=10)
         self.file_type_var = tk.StringVar(value="Python")
         ttk.Combobox(
-            self.root, textvariable=self.file_type_var, values=["Python", "C"], state="readonly"
+            self.root,
+            textvariable=self.file_type_var,
+            values=["Python", "C", "Java"],
+            state="readonly",
         ).pack()
 
         ttk.Button(self.root, text="Charger un fichier", command=self.load_file).pack(pady=10)
 
-        self.editor_text = tk.Text(
-            self.root, height=25, width=100, bg="#262640", fg="#0ef9f9", font=("Courier", 10)
-        )
-        self.editor_text.pack(pady=10)
+        self.file_content = tk.Text(self.root, height=25, width=80)
+        self.file_content.pack(pady=10)
 
         ttk.Button(self.root, text="Envoyer au serveur", command=self.send_to_server).pack(pady=10)
 
         ttk.Label(self.root, text="Résultat:", style="TLabel").pack(pady=5)
-        self.result_text = tk.Text(
-            self.root, height=15, width=100, bg="#262640", fg="#0ef9f9", font=("Courier", 10)
-        )
-        self.result_text.config(state="disabled")
+        self.result_text = tk.Text(self.root, height=10, width=80)
         self.result_text.pack(pady=10)
+        self.result_text.config(state="disabled")
 
     def clear_root(self):
         """Nettoie la fenêtre principale."""
@@ -169,20 +147,24 @@ class ClientApp:
         if filepath:
             with open(filepath, "r") as file:
                 content = file.read()
-                self.editor_text.delete(1.0, tk.END)
-                self.editor_text.insert(tk.END, content)
+                self.file_content.delete(1.0, tk.END)
+                self.file_content.insert(tk.END, content)
+            self.loaded_file_name = os.path.basename(filepath)
 
     def send_to_server(self):
         """Envoie le fichier et son type au serveur."""
-        code = self.editor_text.get(1.0, tk.END).strip()
-        code_type = self.file_type_var.get()
+        file_content = self.file_content.get(1.0, tk.END).strip()
+        file_type = self.file_type_var.get()
+        file_name = getattr(self, "loaded_file_name", "code")
 
-        if code and code_type:
-            threading.Thread(target=self.handle_server_response, args=(code, code_type)).start()
+        if file_content and file_type:
+            threading.Thread(
+                target=self.handle_server_response, args=(file_content, file_type, file_name)
+            ).start()
 
-    def handle_server_response(self, code, code_type):
-        """Gère la réponse du serveur après l'envoi du code."""
-        response = self.connection_manager.send_code(code, code_type)
+    def handle_server_response(self, file_content, file_type, file_name):
+        """Gère la réponse du serveur après l'envoi du fichier."""
+        response = self.connection_manager.send_file(file_content, file_type, file_name)
         self.display_result(response)
 
     def display_result(self, result):
