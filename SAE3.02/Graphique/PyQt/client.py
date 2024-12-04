@@ -88,7 +88,7 @@ class ClientApp(QWidget):
         connect_button = QPushButton("Se connecter")
         connect_button.clicked.connect(self.connect_to_server)
         self.layout.addWidget(connect_button, 4, 0, 1, 2)
-        
+
     def connect_to_server(self):
         server_ip = self.server_ip_input.text()
         server_port = int(self.server_port_input.text())
@@ -138,7 +138,7 @@ class ClientApp(QWidget):
         self.result_text = QTextEdit()
         self.result_text.setReadOnly(True)
         self.layout.addWidget(self.result_text, 6, 0, 1, 2)
-    
+
     def load_file(self):
         filepath, _ = QFileDialog.getOpenFileName(self, "Charger un fichier", "", "Tous les fichiers (*)")
         if filepath:
@@ -167,36 +167,56 @@ class ClientApp(QWidget):
             if widget:
                 widget.deleteLater()
 
-    def button_style(self):
+    def light_theme_css(self):
         return """
+            QWidget {
+                background-color: #f9f9f9;
+                color: #333333;
+                font-family: 'Arial', sans-serif;
+                font-size: 16px;
+            }
+            QLabel {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            QLineEdit, QTextEdit, QComboBox {
+                background-color: #ffffff;
+                color: #333333;
+                border: 2px solid #cccccc;
+                border-radius: 8px;
+                padding: 8px;
+                font-size: 16px;
+            }
+            QLineEdit:focus, QTextEdit:focus, QComboBox:focus {
+                border: 2px solid #4da6ff;
+                outline: none;
+            }
             QPushButton {
                 background-color: #4da6ff;
                 color: white;
-                padding: 12px;
-                border-radius: 10px;
-                font-size: 18pt;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-size: 16px;
+                font-weight: bold;
             }
             QPushButton:hover {
                 background-color: #0073e6;
             }
-        """
-
-    def light_theme_css(self):
-        return """
-            QWidget {
-                background-color: #f0f0f0;
-                color: #000000;
-                font-size: 18pt;
+            QPushButton:pressed {
+                background-color: #005bb5;
             }
-            QLabel {
-                font-size: 18pt;
-                color: #333333;
+            QPushButton:disabled {
+                background-color: #cccccc;
+                color: #666666;
             }
-            QLineEdit, QTextEdit, QComboBox {
-                background-color: #ffffff;
-                color: #000000;
-                border: 1px solid #cccccc;
-                font-size: 18pt;
+            QTextEdit {
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+            }
+            QComboBox {
+                font-size: 16px;
             }
         """
 
