@@ -1,9 +1,9 @@
 import socket
 import threading
-import os
 import platform
 import subprocess
 import psutil
+import os
 
 
 class SlaveHandler(threading.Thread):
@@ -19,7 +19,7 @@ class SlaveHandler(threading.Thread):
             data = self.client_socket.recv(4096).decode()
 
             if data == "CPU_USAGE":
-                cpu_usage = psutil.cpu_percent()
+                cpu_usage = self.get_current_process_cpu_usage()
                 self.client_socket.sendall(f"{cpu_usage}".encode())
             else:
                 response = self.handle_file(data)
@@ -32,7 +32,7 @@ class SlaveHandler(threading.Thread):
     def handle_file(self, data):
         try:
             file_type, file_name, file_content = data.split("\n", 2)
-
+            print(f"Fichier reçu : {file_name}, Type : {file_type}")
             temp_filename = f"temp_{file_name}"
             with open(temp_filename, "w") as temp_file:
                 temp_file.write(file_content)
@@ -45,56 +45,19 @@ class SlaveHandler(threading.Thread):
                     timeout=10
                 )
                 os.remove(temp_filename)
-                return result.stdout if result.returncode == 0 else result.stderr
-
-            elif file_type.lower() == "c":
-                exec_filename = f"{file_name.split('.')[0]}.out"
-                compile_result = subprocess.run(
-                    ["gcc", temp_filename, "-o", exec_filename],
-                    capture_output=True,
-                    text=True
-                )
-                if compile_result.returncode == 0:
-                    run_result = subprocess.run(
-                        [f"./{exec_filename}"],
-                        capture_output=True,
-                        text=True,
-                        timeout=10
-                    )
-                    os.remove(temp_filename)
-                    os.remove(exec_filename)
-                    return run_result.stdout if run_result.returncode == 0 else run_result.stderr
+                if result.returncode == 0:
+                    return result.stdout
                 else:
-                    os.remove(temp_filename)
-                    return compile_result.stderr
-
-            elif file_type.lower() == "java":
-                compile_result = subprocess.run(
-                    ["javac", temp_filename],
-                    capture_output=True,
-                    text=True
-                )
-                if compile_result.returncode == 0:
-                    class_name = file_name.split('.')[0]
-                    run_result = subprocess.run(
-                        ["java", class_name],
-                        capture_output=True,
-                        text=True,
-                        timeout=10
-                    )
-                    os.remove(temp_filename)
-                    os.remove(f"{class_name}.class")
-                    return run_result.stdout if run_result.returncode == 0 else run_result.stderr
-                else:
-                    os.remove(temp_filename)
-                    return compile_result.stderr
-
+                    return result.stderr
             else:
-                os.remove(temp_filename)
                 return f"Type de fichier non supporté : {file_type}"
-
         except Exception as e:
             return f"Erreur lors du traitement du fichier : {e}"
+
+    @staticmethod
+    def get_current_process_cpu_usage():
+        process = psutil.Process()
+        return process.cpu_percent(interval=1)  # Calculer l'utilisation du CPU pour ce processus
 
 
 class MasterServer:
