@@ -1,9 +1,6 @@
 import sys
 import socket
-from PyQt5.QtWidgets import (
-    QApplication, QWidget, QGridLayout, QPushButton, QLabel,
-    QLineEdit, QTextEdit, QFileDialog, QComboBox
-)
+from PyQt5.QtWidgets import (QApplication, QWidget, QGridLayout, QPushButton, QLabel, QLineEdit, QTextEdit, QFileDialog, QComboBox)
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 import os
 
@@ -27,7 +24,7 @@ class CPUUsageThread(QThread):
                     self.cpu_signal.emit(response)
             except Exception as e:
                 self.cpu_signal.emit(f"Erreur lors de la récupération du CPU : {e}")
-            self.msleep(1000)  # Pause d'une seconde entre les mises à jour
+            self.msleep(1000)
 
     def stop(self):
         self.running = False
@@ -62,7 +59,6 @@ class ClientApp(QWidget):
         self.set_stylesheet()
 
     def init_ui(self):
-        # Layout principal
         self.layout = QGridLayout()
         self.setLayout(self.layout)
 
@@ -104,7 +100,7 @@ class ClientApp(QWidget):
         self.layout.addWidget(self.result_text, 8, 0, 1, 2)
 
         # Résultat de l'utilisation du CPU (direct)
-        self.layout.addWidget(QLabel("Utilisation du CPU :"), 9, 0)
+        self.layout.addWidget(QLabel("Utilisation du CPU : (si >70% lancement d'un second serveur)"), 9, 0)
         self.cpu_text = QTextEdit()
         self.cpu_text.setReadOnly(True)
         self.layout.addWidget(self.cpu_text, 10, 0, 1, 2)
@@ -120,7 +116,6 @@ class ClientApp(QWidget):
         self.layout.addWidget(self.stop_cpu_button, 11, 1, 1, 1)
 
     def set_stylesheet(self):
-        # CSS personnalisé
         self.setStyleSheet("""
             QWidget {
                 background-color: #f0f0f0;

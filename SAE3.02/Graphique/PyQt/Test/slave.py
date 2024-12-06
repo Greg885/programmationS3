@@ -12,7 +12,6 @@ class SlaveServer:
         print(f"Serveur esclave démarré sur {self.host}:{self.port}")
 
     def handle_client(self, client_socket):
-        """Gère les requêtes des clients redirigés."""
         try:
             data = client_socket.recv(8192).decode()
             response = f"Requête traitée par un esclave : {data}"
@@ -23,7 +22,6 @@ class SlaveServer:
             client_socket.close()
 
     def start(self):
-        """Démarre l'écoute des clients."""
         try:
             while True:
                 client_socket, client_address = self.server_socket.accept()
