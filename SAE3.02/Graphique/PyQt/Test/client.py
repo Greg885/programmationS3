@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QThread, pyqtSignal
 
 
-# Thread pour surveiller l'utilisation CPU
+
 class CPUUsageThread(QThread):
     cpu_signal = pyqtSignal(str)
 
@@ -33,7 +33,7 @@ class CPUUsageThread(QThread):
         self.running = False
 
 
-# Thread pour envoyer des fichiers
+
 class FileSenderThread(QThread):
     result_signal = pyqtSignal(str)
 
@@ -54,7 +54,6 @@ class FileSenderThread(QThread):
             self.result_signal.emit(f"Erreur : {e}")
 
 
-# Interface principale
 class MainPage(QWidget):
     def __init__(self, server_ip, server_port):
         super().__init__()
