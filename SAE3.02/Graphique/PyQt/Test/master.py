@@ -61,26 +61,51 @@ class SlaveHandler(threading.Thread):
 
 
 class MasterServer:
-    def __init__(self, host="127.0.0.1", port=10000):
+    def __init__(self, host="", port=10000):
         self.host = host
         self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen(5)
+        self.is_running = threading.Event()
+        self.is_running.set()
         print(f"Serveur maître démarré sur {self.host}:{self.port}")
 
     def start(self):
+        # Démarrer le thread d'écoute des commandes utilisateur
+        command_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
+        command_thread.start()
+
         try:
-            while True:
-                client_socket, client_address = self.server_socket.accept()
-                handler = SlaveHandler(client_socket, client_address)
-                handler.start()
+            while self.is_running.is_set():
+                self.server_socket.settimeout(1.0)  # Timeout pour éviter le blocage sur accept()
+                try:
+                    client_socket, client_address = self.server_socket.accept()
+                    handler = SlaveHandler(client_socket, client_address)
+                    handler.start()
+                except socket.timeout:
+                    continue  # Timeout atteint, revenir au début de la boucle
         except KeyboardInterrupt:
-            print("Serveur arrêté.")
+            print("Arrêt demandé par l'utilisateur.")
         finally:
-            self.server_socket.close()
+            self.stop()
+
+    def listen_for_commands(self):
+        while self.is_running.is_set():
+            command = input("Entrez 'arret' pour arrêter le serveur : ").strip()
+            if command.lower() == "arret":
+                self.stop()
+
+    def stop(self):
+        self.is_running.clear()
+        self.server_socket.close()
+        print("Serveur arrêté proprement.")
 
 
 if __name__ == "__main__":
-    server = MasterServer(host="127.0.0.1", port=10000)
-    server.start()
+    server = MasterServer(host="", port=10000)
+    try:
+        server.start()
+    except Exception as e:
+        print(f"Erreur inattendue : {e}")
+        server.stop()
