@@ -5,7 +5,6 @@ import subprocess
 import psutil
 import os
 
-
 class SlaveHandler(threading.Thread):
     def __init__(self, client_socket, client_address):
         super().__init__()
@@ -117,7 +116,7 @@ class SlaveHandler(threading.Thread):
     @staticmethod
     def get_current_process_cpu_usage():
         process = psutil.Process()
-        return process.cpu_percent(interval=1)  # Calculer l'utilisation du CPU pour ce processus
+        return process.cpu_percent(interval=1)
 
 
 class MasterServer:
@@ -132,19 +131,18 @@ class MasterServer:
         print(f"Serveur maître démarré sur {self.host}:{self.port}")
 
     def start(self):
-        # Démarrer le thread d'écoute des commandes utilisateur
         command_thread = threading.Thread(target=self.listen_for_commands, daemon=True)
         command_thread.start()
 
         try:
             while self.is_running.is_set():
-                self.server_socket.settimeout(1.0)  # Timeout pour éviter le blocage sur accept()
+                self.server_socket.settimeout(1.0)
                 try:
                     client_socket, client_address = self.server_socket.accept()
                     handler = SlaveHandler(client_socket, client_address)
                     handler.start()
                 except socket.timeout:
-                    continue  # Timeout atteint, revenir au début de la boucle
+                    continue
         except KeyboardInterrupt:
             print("Arrêt demandé par l'utilisateur.")
         finally:
