@@ -38,21 +38,81 @@ class SlaveHandler(threading.Thread):
                 temp_file.write(file_content)
 
             if file_type.lower() == "python":
-                result = subprocess.run(
-                    [self.python_cmd, temp_filename],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
-                os.remove(temp_filename)
-                if result.returncode == 0:
-                    return result.stdout
-                else:
-                    return result.stderr
+                return self.execute_python(temp_filename)
+
+            elif file_type.lower() == "java":
+                return self.execute_java(temp_filename)
+
+            elif file_type.lower() == "c":
+                return self.execute_c(temp_filename)
+
             else:
                 return f"Type de fichier non supporté : {file_type}"
         except Exception as e:
             return f"Erreur lors du traitement du fichier : {e}"
+
+    def execute_python(self, filename):
+        try:
+            result = subprocess.run(
+                [self.python_cmd, filename],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            os.remove(filename)
+            return result.stdout if result.returncode == 0 else result.stderr
+        except Exception as e:
+            return f"Erreur lors de l'exécution Python : {e}"
+
+    def execute_java(self, filename):
+        try:
+            compiled_filename = filename.replace(".java", ".class")
+            compile_result = subprocess.run(
+                ["javac", filename],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if compile_result.returncode == 0:
+                execute_result = subprocess.run(
+                    ["java", filename.replace(".java", "")],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                os.remove(filename)
+                os.remove(compiled_filename)
+                return execute_result.stdout if execute_result.returncode == 0 else execute_result.stderr
+            else:
+                os.remove(filename)
+                return compile_result.stderr
+        except Exception as e:
+            return f"Erreur lors de l'exécution Java : {e}"
+
+    def execute_c(self, filename):
+        try:
+            compiled_filename = filename.replace(".c", ".out")
+            compile_result = subprocess.run(
+                ["gcc", filename, "-o", compiled_filename],
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            if compile_result.returncode == 0:
+                execute_result = subprocess.run(
+                    [f"./{compiled_filename}"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                os.remove(filename)
+                os.remove(compiled_filename)
+                return execute_result.stdout if execute_result.returncode == 0 else execute_result.stderr
+            else:
+                os.remove(filename)
+                return compile_result.stderr
+        except Exception as e:
+            return f"Erreur lors de l'exécution C : {e}"
 
     @staticmethod
     def get_current_process_cpu_usage():
