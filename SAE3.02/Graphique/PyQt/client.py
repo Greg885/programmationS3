@@ -53,6 +53,9 @@ class FileSenderThread(QThread):
         except Exception as e:
             self.result_signal.emit(f"Erreur : {e}")
 
+    def join(self):
+        super().wait()
+
 
 class MainPage(QWidget):
     def __init__(self, server_ip, server_port):
@@ -154,9 +157,13 @@ class MainPage(QWidget):
         file_name = getattr(self, "loaded_file_name", "code.py")
 
         if file_content:
+            self.result_text.clear()
+            self.send_button.setDisabled(True)
+
             message = f"{file_type}\n{file_name}\n{file_content}"
             self.thread = FileSenderThread(self.server_ip, self.server_port, message)
             self.thread.result_signal.connect(self.display_result)
+            self.thread.finished.connect(lambda: self.send_button.setDisabled(False))  # Réactiver le bouton
             self.thread.start()
 
     def start_cpu_monitoring(self):
@@ -211,21 +218,26 @@ class ConnectionPage(QWidget):
                 font-size: 14px;
                 font-weight: bold;
             }
-            QLineEdit {
+            QTextEdit, QComboBox {
                 border: 1px solid #ccc;
                 border-radius: 5px;
                 padding: 5px;
-                font-size: 12px;
+                font-family: Consolas, monospace;
+                background-color: #f9f9f9;
             }
             QPushButton {
-                background-color: #007BFF;
+                background-color: #4CAF50;
                 color: white;
                 font-size: 14px;
                 border-radius: 5px;
                 padding: 8px;
             }
             QPushButton:hover {
-                background-color: #0056b3;
+                background-color: #45a049;
+            }
+            QPushButton:disabled {
+                background-color: #666666;
+                color: #666666;
             }
         """)
 
