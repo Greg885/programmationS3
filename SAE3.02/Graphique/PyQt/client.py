@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QThread, pyqtSignal
 
 
-
 class CPUUsageThread(QThread):
     cpu_signal = pyqtSignal(str)
 
@@ -31,7 +30,6 @@ class CPUUsageThread(QThread):
 
     def stop(self):
         self.running = False
-
 
 
 class FileSenderThread(QThread):
@@ -105,16 +103,10 @@ class MainPage(QWidget):
         layout.addWidget(QLabel("Utilisation du CPU :"))
         layout.addWidget(self.cpu_text)
 
-        # Boutons pour surveiller le CPU
-        cpu_button_layout = QHBoxLayout()
-        self.start_cpu_button = QPushButton("Démarrer la surveillance CPU")
-        self.start_cpu_button.clicked.connect(self.start_cpu_monitoring)
-        cpu_button_layout.addWidget(self.start_cpu_button)
-
-        self.stop_cpu_button = QPushButton("Arrêter la surveillance CPU")
-        self.stop_cpu_button.clicked.connect(self.stop_cpu_monitoring)
-        cpu_button_layout.addWidget(self.stop_cpu_button)
-        layout.addLayout(cpu_button_layout)
+        # Bouton On/Off pour la surveillance du CPU
+        self.cpu_on_off_button = QPushButton("Démarrer la surveillance CPU")
+        self.cpu_on_off_button.clicked.connect(self.toggle_cpu_monitoring)
+        layout.addWidget(self.cpu_on_off_button)
 
         self.setLayout(layout)
 
@@ -132,14 +124,19 @@ class MainPage(QWidget):
                 background-color: #f9f9f9;
             }
             QPushButton {
-                background-color: #4CAF50;
+                background-color: #FF8400;
                 color: white;
                 font-size: 14px;
                 border-radius: 5px;
                 padding: 8px;
             }
             QPushButton:hover {
-                background-color: #45a049;
+                background-color: #ba4a00;
+            }
+            QPushButton:disabled {
+                background-color: #e0e0e0; /* Couleur grisée */
+                color: #a0a0a0; /* Texte grisé */
+                border: 1px solid #d0d0d0; /* Bordure grisée */
             }
         """)
 
@@ -166,8 +163,15 @@ class MainPage(QWidget):
             self.thread.finished.connect(lambda: self.send_button.setDisabled(False))  # Réactiver le bouton
             self.thread.start()
 
+    def toggle_cpu_monitoring(self):
+        if self.cpu_thread and self.cpu_thread.isRunning():
+            self.stop_cpu_monitoring()
+        else:
+            self.start_cpu_monitoring()
+
     def start_cpu_monitoring(self):
-        if self.cpu_thread is None or not self.cpu_thread.isRunning():
+        if not self.cpu_thread or not self.cpu_thread.isRunning():
+            self.cpu_on_off_button.setText("Arrêter la surveillance CPU")
             self.cpu_thread = CPUUsageThread(self.server_ip, self.server_port)
             self.cpu_thread.cpu_signal.connect(self.display_cpu)
             self.cpu_thread.start()
@@ -176,6 +180,7 @@ class MainPage(QWidget):
         if self.cpu_thread and self.cpu_thread.isRunning():
             self.cpu_thread.stop()
             self.cpu_thread = None
+            self.cpu_on_off_button.setText("Démarrer la surveillance CPU")
 
     def display_result(self, result):
         self.result_text.setPlainText(result)
@@ -184,7 +189,6 @@ class MainPage(QWidget):
         self.cpu_text.setPlainText(cpu_usage)
 
 
-# Page de connexion
 class ConnectionPage(QWidget):
     def __init__(self, switch_to_main):
         super().__init__()
@@ -218,26 +222,21 @@ class ConnectionPage(QWidget):
                 font-size: 14px;
                 font-weight: bold;
             }
-            QTextEdit, QComboBox {
+            QLineEdit {
                 border: 1px solid #ccc;
                 border-radius: 5px;
                 padding: 5px;
-                font-family: Consolas, monospace;
-                background-color: #f9f9f9;
+                font-size: 12px;
             }
             QPushButton {
-                background-color: #4CAF50;
+                background-color: #007BFF;
                 color: white;
                 font-size: 14px;
                 border-radius: 5px;
                 padding: 8px;
             }
             QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: #666666;
-                color: #666666;
+                background-color: #0056b3;
             }
         """)
 
@@ -247,7 +246,6 @@ class ConnectionPage(QWidget):
         self.switch_to_main(ip, port)
 
 
-# Application principale
 class ClientApp(QMainWindow):
     def __init__(self):
         super().__init__()
