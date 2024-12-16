@@ -14,10 +14,10 @@ ProgrammationS3
 ├── README				#Document de présentation
 |
 ├── Documentation
-|	└── Document d'installation	#Comment installer et lancer le Cluster de A à Z (PDF)
-|	└── Document de Réponse		#Fonctionalité de l'architecture globale (PDF)
-|	└── Document Video 		#Lien de la video de présentation (TXT)
-|	└── Diagramme de Gantt		#Annexe du document de réponse
+|	└── Installation		#Document d'installation - Comment installer et lancer le Cluster de A à Z (PDF)
+|	└── RapportFinal		#Fonctionalité de l'architecture globale (PDF)
+|	└── LienVideo	 		#Lien de la video de présentation (TXT)
+|	└── Diagramme de GANTT		#Annexe du document de réponse (Excel)
 |
 ├── .idea 				#Fichier python base
 │
