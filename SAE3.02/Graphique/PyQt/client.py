@@ -1,3 +1,6 @@
+#Script client.py codé par G.Runser pour la SAE3.02
+#Manuel d'utilisation disponible sur Github
+
 import sys
 import socket
 from PyQt5.QtWidgets import (
