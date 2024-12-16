@@ -3,11 +3,11 @@ Cluster de Calcul - SAE303 - BUT RT, UHA, IUT de Colmar
 Projet en libre acces - Open Source
 Pensé par Dr. Drouhin Fréderic, Enseigant-Chercheur à l'université de Haute-Alsace
 Conçu et programmé par Runser Grégory, Elève de 2nd Année de BUT RT
-__________________________________________________________________________________
+_______________________________________________________________________________________________________________________
 Vous trouverez l'ensemble des document necessaire pour : 
 	La compréhension du projet 
 	La mise en place du Cluster
-__________________________________________________________________________________
+_______________________________________________________________________________________________________________________
 
 ProgrammationS3
 |
@@ -29,7 +29,7 @@ ProgrammationS3
 		└── master.py		#Fichier python serveur maitre (PY)
 		└── client.py		#Fichier python client  (PY)
 		└── slave.py		#Fichier python serveur esclave (PY)
-__________________________________________________________________________________
+_______________________________________________________________________________________________________________________
 
 Mise à jour le 31.12.2024
 		
