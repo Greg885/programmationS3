@@ -24,11 +24,14 @@ ProgrammationS3
 ├── R3.09           			# Code d'exercices
 │
 ├── SAE3.02          
-	└── ScriptTest			#Script de Test pour le projet (Python, C, Java) 
-	└── Graphique/PyQt        
-		└── master.py		#Fichier python serveur maitre (PY)
-		└── client.py		#Fichier python client  (PY)
-		└── slave.py		#Fichier python serveur esclave (PY)
+|	└── ScriptTest			#Script de Test pour le projet (Python, C, Java) 
+|	└── Graphique/PyQt        
+|		└── master.py		#Fichier python serveur maitre (PY)
+|		└── client.py		#Fichier python client  (PY)
+|		└── slave.py		#Fichier python serveur esclave (PY)
+|
+├── programmationS3.code-workspace	#Fichier Creation Python Workspace
+
 _______________________________________________________________________________________________________________________
 
 Mise à jour le 31.12.2024
