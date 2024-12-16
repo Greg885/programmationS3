@@ -17,6 +17,7 @@ ProgrammationS3
 |	└── Document d'installation	#Comment installer et lancer le Cluster de A à Z (PDF)
 |	└── Document de Réponse		#Fonctionalité de l'architecture globale (PDF)
 |	└── Document Video 		#Lien de la video de présentation (TXT)
+|	└── Diagramme de Gantt		#Annexe du document de réponse
 |
 ├── .idea 				#Fichier python base
 │
